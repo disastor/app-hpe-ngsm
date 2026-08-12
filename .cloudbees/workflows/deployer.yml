@@ -1,0 +1,82 @@
+# deployer.yaml — app-hpe-ngsm
+#
+# Mirrors the taskflow reference architecture (disastor/app-taskflow):
+# one job per component, each conditionally deployed based on the
+# system-generated release manifest, calling that component's own
+# deploy.yaml in ITS OWN repo. This is the real multi-component
+# orchestration Evan called out on the call as the actual differentiator
+# over "just trigger a Jenkins job" — genuine dependency ordering
+# across independently-built components, not a single flat pipeline.
+#
+# Sequencing: HPCM_ADMIN (cluster/management) before NGSM-Base (compute-
+# facing) before CPE before PBS — a real install-order constraint, not
+# an arbitrary one.
+#
+# NOTE on the manifest key: the second-level key under each component
+# is assumed to be the artifact's registered `name` (e.g. "ngsm-base"),
+# matching what each component's build workflow already passes to
+# register-build-artifact. This is inferred from the taskflow example,
+# not yet confirmed against a real Unify-generated manifest - verify
+# once an actual Release is created against the Application, and
+# adjust here if the real key differs.
+#
+# Replace `disastor` below with the actual GitHub org/user the four
+# component repos get pushed to, if different.
+
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: deployer
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      manifest:
+        type: string
+        required: true
+
+jobs:
+  hpcm-admin:
+    if: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].deploy }}
+    uses: disastor/hpcm-admin/.cloudbees/workflows/deploy.yaml
+    vars: inherit
+    secrets: inherit
+    with:
+      artifact-id: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].id }}
+      version: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].version }}
+      environment: ${{ inputs.environment }}
+
+  ngsm-base:
+    needs: hpcm-admin
+    if: ${{ fromJSON(inputs.manifest)['ngsm-base']['ngsm-base'].deploy }}
+    uses: disastor/ngsm-base/.cloudbees/workflows/deploy.yaml
+    vars: inherit
+    secrets: inherit
+    with:
+      artifact-id: ${{ fromJSON(inputs.manifest)['ngsm-base']['ngsm-base'].id }}
+      version: ${{ fromJSON(inputs.manifest)['ngsm-base']['ngsm-base'].version }}
+      environment: ${{ inputs.environment }}
+
+  cpe:
+    needs: ngsm-base
+    if: ${{ fromJSON(inputs.manifest)['cpe']['cpe'].deploy }}
+    uses: disastor/cpe/.cloudbees/workflows/deploy.yaml
+    vars: inherit
+    secrets: inherit
+    with:
+      artifact-id: ${{ fromJSON(inputs.manifest)['cpe']['cpe'].id }}
+      version: ${{ fromJSON(inputs.manifest)['cpe']['cpe'].version }}
+      environment: ${{ inputs.environment }}
+
+  pbs:
+    needs: cpe
+    if: ${{ fromJSON(inputs.manifest)['pbs']['pbs'].deploy }}
+    uses: disastor/pbs/.cloudbees/workflows/deploy.yaml
+    vars: inherit
+    secrets: inherit
+    with:
+      artifact-id: ${{ fromJSON(inputs.manifest)['pbs']['pbs'].id }}
+      version: ${{ fromJSON(inputs.manifest)['pbs']['pbs'].version }}
+      environment: ${{ inputs.environment }}
