@@ -40,7 +40,7 @@ on:
 jobs:
   hpcm-admin:
     if: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].deploy }}
-    uses: disastor/hpcm-admin/.cloudbees/workflows/deploy.yml
+    uses: disastor/hpcm-admin/.cloudbees/workflows/deploy.yml@main
     vars: inherit
     secrets: inherit
     with:
@@ -51,7 +51,7 @@ jobs:
   ngsm-base:
     needs: hpcm-admin
     if: ${{ fromJSON(inputs.manifest)['ngsm-base']['ngsm-base'].deploy }}
-    uses: disastor/ngsm-base/.cloudbees/workflows/deploy.yml
+    uses: disastor/ngsm-base/.cloudbees/workflows/deploy.yml@main
     vars: inherit
     secrets: inherit
     with:
@@ -62,7 +62,7 @@ jobs:
   cpe:
     needs: ngsm-base
     if: ${{ fromJSON(inputs.manifest)['cpe']['cpe'].deploy }}
-    uses: disastor/cpe/.cloudbees/workflows/deploy.yml
+    uses: disastor/cpe/.cloudbees/workflows/deploy.yml@main
     vars: inherit
     secrets: inherit
     with:
@@ -73,7 +73,7 @@ jobs:
   pbs:
     needs: cpe
     if: ${{ fromJSON(inputs.manifest)['pbs']['pbs'].deploy }}
-    uses: disastor/pbs/.cloudbees/workflows/deploy.yml
+    uses: disastor/pbs/.cloudbees/workflows/deploy.yml@main
     vars: inherit
     secrets: inherit
     with:
