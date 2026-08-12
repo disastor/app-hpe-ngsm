@@ -58,7 +58,7 @@ jobs:
     vars: inherit
     secrets: inherit
     with:
-      artifact-id: ${{ fromJSON(inputs.manifest)['NGSM-Base]['ngsm-base'].id }}
+      artifact-id: ${{ fromJSON(inputs.manifest)['NGSM-Base']['ngsm-base'].id }}
       version: ${{ fromJSON(inputs.manifest)['NGSM-Base']['ngsm-base'].version }}
       environment: ${{ inputs.environment }}
 
