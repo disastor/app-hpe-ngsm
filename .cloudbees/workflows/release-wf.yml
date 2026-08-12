@@ -1,0 +1,55 @@
+# release-wf.yml — app-hpe-ngsm
+#
+# Staged workflow, mirroring disastor/app-taskflow's release-wf.yml
+# pattern exactly (metadata: stages/v1alpha1 for the release pipeline
+# view, an Approve gate delegating to the manual-approval action, then
+# a stage job that calls deployer.yaml).
+#
+# Deliberately ONE real stage - HPC-Test-Cluster - rather than
+# inventing a DEV/STAGING/PROD progression HPE doesn't actually have
+# today. Add more stages here the same way once more environments
+# exist (copy the HPC-Test-Cluster job, point environment: at the new
+# one, chain needs: off the prior stage).
+
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: NGSM Release WF
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest:
+        type: string
+        required: true
+        description: System-generated manifest for releases
+
+metadata:
+  stages/v1alpha1:
+    - name: HPC-Test-Cluster
+      jobs:
+        - Approve
+        - HPC-Test-Cluster
+
+jobs:
+  Approve:
+    timeout-minutes: 4320
+    delegates: cloudbees-io/manual-approval/custom-job.yml@v1
+    with:
+      disallowLaunchByUser: false
+      notifyAllEligibleUsers: false
+      # Blank so anyone on the demo can self-approve, same as taskflow's
+      # workshop convention. approvers supports user IDs or emails.
+      approvers: ""
+      approvalInputs: |
+        Comment:
+          type: string
+
+  HPC-Test-Cluster:
+    needs: Approve
+    environment: hpc-test-cluster
+    uses: ./.cloudbees/workflows/deployer.yaml
+    vars: inherit
+    secrets: inherit
+    with:
+      manifest: ${{ inputs.manifest }}
+      environment: ${{ job.environment }}
