@@ -47,7 +47,7 @@ jobs:
   HPC-Test-Cluster:
     needs: Approve
     environment: hpc-test-cluster
-    uses: ./.cloudbees/workflows/deployer.yaml
+    uses: ./.cloudbees/workflows/deployer.yml
     vars: inherit
     secrets: inherit
     with:
