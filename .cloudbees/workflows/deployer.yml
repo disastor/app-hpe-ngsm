@@ -40,47 +40,47 @@ on:
 jobs:
 
   hpcm-admin:
-    if: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].deploy }}
+    if: ${{ fromJSON(inputs.manifest)['HPCM_admin']['hpcm-admin'].deploy }}
     uses: disastor/hpcm_admin/.cloudbees/workflows/deploy.yml@main
     vars: inherit
     secrets: inherit
     with:
-      artifact-id: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].id }}
-      version: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].version }}
+      artifact-id: ${{ fromJSON(inputs.manifest)['HPCM_admin']['hpcm-admin'].id }}
+      version: ${{ fromJSON(inputs.manifest)['HPCM_admin']['hpcm-admin'].version }}
       environment: ${{ inputs.environment }}
 
 
 
   ngsm-base:
     needs: hpcm-admin
-    if: ${{ fromJSON(inputs.manifest)['ngsm-base']['ngsm-base'].deploy }}
+    if: ${{ fromJSON(inputs.manifest)['NGSM-Base']['ngsm-base'].deploy }}
     uses: disastor/ngsm-base/.cloudbees/workflows/deploy.yml@main
     vars: inherit
     secrets: inherit
     with:
-      artifact-id: ${{ fromJSON(inputs.manifest)['ngsm-base']['ngsm-base'].id }}
-      version: ${{ fromJSON(inputs.manifest)['ngsm-base']['ngsm-base'].version }}
+      artifact-id: ${{ fromJSON(inputs.manifest)['NGSM-Base]['ngsm-base'].id }}
+      version: ${{ fromJSON(inputs.manifest)['NGSM-Base']['ngsm-base'].version }}
       environment: ${{ inputs.environment }}
 
 
   cpe:
     needs: ngsm-base
-    if: ${{ fromJSON(inputs.manifest)['cpe']['cpe'].deploy }}
+    if: ${{ fromJSON(inputs.manifest)['CPE']['cpe'].deploy }}
     uses: disastor/cpe/.cloudbees/workflows/deploy.yml@main
     vars: inherit
     secrets: inherit
     with:
-      artifact-id: ${{ fromJSON(inputs.manifest)['cpe']['cpe'].id }}
-      version: ${{ fromJSON(inputs.manifest)['cpe']['cpe'].version }}
+      artifact-id: ${{ fromJSON(inputs.manifest)['CPE']['cpe'].id }}
+      version: ${{ fromJSON(inputs.manifest)['CPE']['cpe'].version }}
       environment: ${{ inputs.environment }}
 
   pbs:
     needs: cpe
-    if: ${{ fromJSON(inputs.manifest)['pbs']['pbs'].deploy }}
+    if: ${{ fromJSON(inputs.manifest)['PBS']['pbs'].deploy }}
     uses: disastor/pbs/.cloudbees/workflows/deploy.yml@main
     vars: inherit
     secrets: inherit
     with:
-      artifact-id: ${{ fromJSON(inputs.manifest)['pbs']['pbs'].id }}
-      version: ${{ fromJSON(inputs.manifest)['pbs']['pbs'].version }}
+      artifact-id: ${{ fromJSON(inputs.manifest)['PBS']['pbs'].id }}
+      version: ${{ fromJSON(inputs.manifest)['PBS']['pbs'].version }}
       environment: ${{ inputs.environment }}
