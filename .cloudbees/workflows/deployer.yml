@@ -39,7 +39,20 @@ on:
 
 jobs:
 
+  hpcm-admin:
+    if: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].deploy }}
+    uses: disastor/hpcm_admin/.cloudbees/workflows/deploy.yml@main
+    vars: inherit
+    secrets: inherit
+    with:
+      artifact-id: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].id }}
+      version: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].version }}
+      environment: ${{ inputs.environment }}
+
+
+
   ngsm-base:
+    needs: hpcm-admin
     if: ${{ fromJSON(inputs.manifest)['ngsm-base']['ngsm-base'].deploy }}
     uses: disastor/ngsm-base/.cloudbees/workflows/deploy.yml@main
     vars: inherit
@@ -48,18 +61,6 @@ jobs:
       artifact-id: ${{ fromJSON(inputs.manifest)['ngsm-base']['ngsm-base'].id }}
       version: ${{ fromJSON(inputs.manifest)['ngsm-base']['ngsm-base'].version }}
       environment: ${{ inputs.environment }}
-
-
-  #hpcm-admin:
-   # needs: ngsm-base
-    #if: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].deploy }}
-   # uses: disastor/hpcm-admin/.cloudbees/workflows/deploy.yml@main
-   # vars: inherit
-   # secrets: inherit
-   # with:
-    #  artifact-id: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].id }}
-    #  version: ${{ fromJSON(inputs.manifest)['hpcm-admin']['hpcm-admin'].version }}
-    #  environment: ${{ inputs.environment }}
 
 
   cpe:
